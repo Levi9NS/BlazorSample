@@ -1,0 +1,44 @@
+﻿@page "/contacts/{Id}"
+@using BlazorContacts.Client.Services
+@inject ContactsClientService service
+@using BlazorContacts.Shared.Models
+
+<div class="row">
+    <h1>Contact</h1>
+
+    <div class="col-md-12">
+        <table>
+            <tbody>
+                <tr>
+                    <td>Name</td>
+                    <td>@model.Name</td>
+                </tr>
+                <tr>
+                    <td>City</td>
+                    <td>@model.City</td>
+                </tr>
+                <tr>
+                    <td>Phone number &nbsp;</td>
+                    <td>@model.PhoneNumber</td>
+                </tr>
+                <tr>
+                    <td>Is Favorite</td>
+                    <td>@model.IsFavorite</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+@functions {
+    [Parameter]
+    private string Id { get; set; }
+    ContactModel model = new ContactModel();
+
+    protected override async Task OnInitAsync()
+    {
+        model = await service.GetByIdAsync(Guid.Parse(Id));
+    }
+
+}

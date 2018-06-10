@@ -1,0 +1,154 @@
+﻿@page "/"
+@using BlazorContacts.Client.Services
+@inject ContactsClientService service
+@using BlazorContacts.Shared.Models
+
+<div class="row">
+    <div class="col-md-6">
+        <h1>Contacts</h1>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <a class="btn btn-default" href="/contact">Add</a>
+    </div>
+</div>
+
+@if (!loading)
+{
+<div class="row">
+    <div class="col-md-12">
+        <table class="table table-stripped">
+            <thead>
+                <tr>
+                    <th>
+                        Is Favorite
+                    </th>
+                    <th>Name</th>
+                    <th>City</th>
+                    <th>Phone number</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var row in contacts)
+                {
+                <tr>
+                    <td>
+                        @if (row.IsFavorite)
+                        {
+                            <span class="oi oi-star active" onclick="@(async () => await ToggleFavorite(row))"></span>
+                        }
+                        else
+                        {
+                            <span class="oi oi-star active" style="opacity: 0.3" onclick="@(async () => await ToggleFavorite(row))"></span>
+                        }
+                    </td>
+                    @if (editingModel?.Id == row.Id)
+                    {
+                        <td>
+                            <input bind="@editingModel.Name" />
+                        </td>
+                        <td>
+                            <input bind="@editingModel.City" />
+                        </td>
+                        <td>
+                            <input bind="@editingModel.PhoneNumber" />
+                        </td>
+                        <td>
+                            <span class="oi oi-check active" title="save" onclick="@(async () => await EditSave())"></span>
+
+                            <span style="margin-left: 20px" class="oi oi-x active" title="cancel" onclick="@(() => EditCancel())"></span>
+                        </td>
+                    }
+                    else
+                    {
+                        <td>@row.Name</td>
+                        <td>@row.City</td>
+                        <td>@row.PhoneNumber</td>
+
+                        <td>
+                            <i class="oi oi-pencil active" title="Edit" onclick="@(() => Edit(row))"></i>
+
+                            <span style="margin-left: 20px" class="oi oi-trash active" title="Delete" onclick="@(async () => await Delete(row.Id))"></span>
+
+                            <a style="margin-left: 20px" href="/contacts/@row.Id" title="edit">
+                                <i class="oi oi-eye active" title="View"></i>
+                            </a>
+                        </td>
+                    }
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+}
+else
+{
+    <div>loading...</div>
+}
+
+@functions {
+    private List<ContactModel> contacts = new List<ContactModel>();
+    private bool loading = true;
+    private ContactModel editingModel = new ContactModel();
+
+    private async Task Refresh()
+    {
+        contacts = await service.GetAllAsync();
+        loading = false;
+    }
+
+    protected override async Task OnInitAsync()
+    {
+        await Refresh();
+    }
+
+    public async Task ToggleFavorite(ContactModel contact)
+    {
+        contact.IsFavorite = !contact.IsFavorite;
+        await service.SetIsFavorite(contact.Id, contact.IsFavorite);
+        NotifierService.Info("Change saved");
+    }
+
+    public async Task Delete(Guid id)
+    {
+        await service.Delete(id);
+        contacts.RemoveAll(x => x.Id == id);
+        NotifierService.Info("Contact deleted");
+    }
+
+    public void Edit(ContactModel contact)
+    {
+        editingModel = new ContactModel(contact);
+    }
+
+    public void EditCancel()
+    {
+        editingModel = new ContactModel();
+    }
+
+    public async Task EditSave()
+    {
+        if (string.IsNullOrWhiteSpace(editingModel.Name)
+            || string.IsNullOrWhiteSpace(editingModel.PhoneNumber)
+            || string.IsNullOrWhiteSpace(editingModel.City)
+            )
+        {
+            NotifierService.Warning("All inputs are required");
+        }
+        else
+        {
+            await service.Save(editingModel);
+            NotifierService.Info("Changes saved");
+            var model = contacts.FirstOrDefault(x => x.Id == editingModel.Id);
+            if (model != null)
+            {
+                model.Update(editingModel);
+            }
+            editingModel = new ContactModel();
+        }
+    }
+}
