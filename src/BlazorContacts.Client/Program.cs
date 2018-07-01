@@ -12,6 +12,7 @@ namespace BlazorContacts.Client
             var serviceProvider = new BrowserServiceProvider(services =>
             {
                 services.AddSingleton<ContactsClientService>();
+                services.AddSingleton<ModalService>();
             });
 
             new BrowserRenderer(serviceProvider).AddComponent<App>("app");

@@ -13,7 +13,7 @@ namespace BlazorContacts.Server
 
         static ContactsStore()
         {
-            Guid id1 = Guid.NewGuid();
+            Guid id1 = Guid.Parse("{3C6D21AC-BEAD-4F5C-B14D-4B5C87EB7A83}");
             _data[id1] = new ContactModel
             {
                 City = "Novi Sad",
@@ -23,7 +23,7 @@ namespace BlazorContacts.Server
                 PhoneNumber = "065 010 012"
             };
 
-            Guid id2 = Guid.NewGuid();
+            Guid id2 = Guid.Parse("{904E6D92-2670-467E-8587-56528AF85020}");
             _data[id2] = new ContactModel
             {
                 City = "Novi Sad",
@@ -33,7 +33,7 @@ namespace BlazorContacts.Server
                 PhoneNumber = "065 1111 222"
             };
 
-            Guid id3 = Guid.NewGuid();
+            Guid id3 = Guid.Parse("{88E90DE2-2A6E-4335-B8F9-68A881F0892D}");
             _data[id3] = new ContactModel
             {
                 City = "Zrenjanin",
@@ -43,7 +43,7 @@ namespace BlazorContacts.Server
                 PhoneNumber = "065 333 456"
             };
 
-            Guid id4 = Guid.NewGuid();
+            Guid id4 = Guid.Parse("{AA04A02C-B37B-424E-B07A-96B195432817}");
             _data[id4] = new ContactModel
             {
                 City = "Beograd",
@@ -54,7 +54,7 @@ namespace BlazorContacts.Server
             };
         }
 
-        public IEnumerable<ContactModel> GetAll() => _data.Select(x => x.Value);
+        public IEnumerable<ContactModel> GetAll() => _data.Select(x => x.Value).OrderBy(x => x.Name);
 
         public ContactModel GetById(Guid id)
         {

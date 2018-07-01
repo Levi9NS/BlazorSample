@@ -1,103 +1,170 @@
 ﻿@page "/"
 @using BlazorContacts.Client.Services
-@inject ContactsClientService service
+@inject ContactsClientService contactsService
+@inject ModalService modalService
 @using BlazorContacts.Shared.Models
 
-<div class="row">
+<div class="contactModel">
     <div class="col-md-6">
         <h1>Contacts</h1>
     </div>
 </div>
 
-<div class="row">
+<div class="contactModel">
     <div class="col-md-6">
-        <a class="btn btn-default" href="/contact">Add</a>
+        <button class="btn btn-default" onclick="@Add">Add</button>
     </div>
 </div>
 
 @if (!loading)
 {
-<div class="row">
-    <div class="col-md-12">
-        <table class="table table-stripped">
-            <thead>
-                <tr>
-                    <th>
-                        Is Favorite
-                    </th>
-                    <th>Name</th>
-                    <th>City</th>
-                    <th>Phone number</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var row in contacts)
-                {
-                <tr>
-                    <td>
-                        @if (row.IsFavorite)
-                        {
-                            <span class="oi oi-star active" onclick="@(async () => await ToggleFavorite(row))"></span>
-                        }
-                        else
-                        {
-                            <span class="oi oi-star active" style="opacity: 0.3" onclick="@(async () => await ToggleFavorite(row))"></span>
-                        }
-                    </td>
-                    @if (editingModel?.Id == row.Id)
+    <div class="contactModel">
+        <div class="col-md-12">
+            <table class="table table-stripped">
+                <thead>
+                    <tr>
+                        <th>
+                            Is Favorite
+                        </th>
+                        <th>Name</th>
+                        <th>City</th>
+                        <th>Phone number</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var contactModel in contacts)
                     {
-                        <td>
-                            <input bind="@editingModel.Name" />
-                        </td>
-                        <td>
-                            <input bind="@editingModel.City" />
-                        </td>
-                        <td>
-                            <input bind="@editingModel.PhoneNumber" />
-                        </td>
-                        <td>
-                            <span class="oi oi-check active" title="save" onclick="@(async () => await EditSave())"></span>
+                        <tr>
+                            <td>
+                                @if (contactModel.IsFavorite)
+                                {
+                                    <span class="oi oi-star active" onclick="@(async () => await ToggleFavorite(contactModel))"></span>
+                                }
+                                else
+                                {
+                                    <span class="oi oi-star active" style="opacity: 0.3" onclick="@(async () => await ToggleFavorite(contactModel))"></span>
+                                }
+                            </td>
+                            @if (editingModel?.Id == contactModel.Id)
+                            {
+                                <td>
+                                    <input bind="@editingModel.Name" />
+                                </td>
+                                <td>
+                                    <input bind="@editingModel.City" />
+                                </td>
+                                <td>
+                                    <input bind="@editingModel.PhoneNumber" />
+                                </td>
+                                <td>
+                                    <span class="oi oi-check active" title="save" onclick="@(async () => await EditSave())"></span>
 
-                            <span style="margin-left: 20px" class="oi oi-x active" title="cancel" onclick="@(() => EditCancel())"></span>
-                        </td>
+                                    <span style="margin-left: 20px" class="oi oi-x active" title="cancel" onclick="@(() => EditCancel())"></span>
+                                </td>
+                            }
+                            else
+                            {
+                                <td>@contactModel.Name</td>
+                                <td>@contactModel.City</td>
+                                <td>@contactModel.PhoneNumber</td>
+
+                                <td>
+                                    <i class="oi oi-pencil active" title="Edit" onclick="@(() => Edit(contactModel))"></i>
+
+                                    <i style="margin-left: 20px" class="oi oi-trash active" title="Delete" onclick="@(() => DeleteContact(contactModel))"></i>
+
+                                    <a style="margin-left: 20px" href="/contacts/@contactModel.Id" title="edit">
+                                        <i class="oi oi-eye active" title="View"></i>
+                                    </a>
+                                </td>
+                            }
+                        </tr>
                     }
-                    else
-                    {
-                        <td>@row.Name</td>
-                        <td>@row.City</td>
-                        <td>@row.PhoneNumber</td>
-
-                        <td>
-                            <i class="oi oi-pencil active" title="Edit" onclick="@(() => Edit(row))"></i>
-
-                            <span style="margin-left: 20px" class="oi oi-trash active" title="Delete" onclick="@(async () => await Delete(row.Id))"></span>
-
-                            <a style="margin-left: 20px" href="/contacts/@row.Id" title="edit">
-                                <i class="oi oi-eye active" title="View"></i>
-                            </a>
-                        </td>
-                    }
-                </tr>
-                }
-            </tbody>
-        </table>
+                </tbody>
+            </table>
+        </div>
     </div>
-</div>
+    
 }
 else
 {
     <div>loading...</div>
 }
 
+<div class="modal" id="deleteModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <!-- Modal Header -->
+            <div class="modal-header">
+                <h4 class="modal-title">Confirm delete</h4>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+
+            <!-- Modal body -->
+            <div class="modal-body">
+                Are you sure you want to delete contact "@deletingModel?.Name"?
+            </div>
+
+            <!-- Modal footer -->
+            <div class="modal-footer">
+                <button type="button" class="btn" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" onclick=@(async () => await ConfirmDelete())>Delete</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="addModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <!-- Modal Header -->
+            <div class="modal-header">
+                <h4 class="modal-title">Add contact</h4>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+
+            <!-- Modal body -->
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="addName">Name</label>
+                    <input type="text" class="form-control" id="addName" bind="@addModel.Name" />
+                </div>
+                <div class="form-group">
+                    <label for="addPhone">Phone number</label>
+                    <input type="text" class="form-control" id="addPhone"  bind="@addModel.PhoneNumber" />
+                </div>
+                <div class="form-group">
+                    <label for="addCity">City</label>
+                    <input type="text" class="form-control" id="addCity"  bind="@addModel.City" />
+                </div>
+            </div>
+
+            <!-- Modal footer -->
+            <div class="modal-footer">
+                <button type="button" class="btn" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" onclick=@(async () => await ConfirmAdd())>Add</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+
 @functions {
     private List<ContactModel> contacts = new List<ContactModel>();
     private bool loading = true;
     private ContactModel editingModel = new ContactModel();
-
+    private ContactModel deletingModel = null;
+    private ContactModel addModel = new ContactModel();
+    
     private async Task Refresh()
     {
-        contacts = await service.GetAllAsync();
+        contacts = await contactsService.GetAllAsync();
         loading = false;
     }
 
@@ -108,20 +175,59 @@ else
 
     public async Task ToggleFavorite(ContactModel contact)
     {
+        NotifierService.Log("in ToggleFavorite");
         contact.IsFavorite = !contact.IsFavorite;
-        await service.SetIsFavorite(contact.Id, contact.IsFavorite);
+        await contactsService.SetIsFavorite(contact.Id, contact.IsFavorite);
         NotifierService.Info("Change saved");
     }
 
-    public async Task Delete(Guid id)
+    public void DeleteContact(ContactModel model)
     {
-        await service.Delete(id);
-        contacts.RemoveAll(x => x.Id == id);
-        NotifierService.Info("Contact deleted");
+        NotifierService.Log("in DeleteContact");
+        deletingModel = model;
+        //if (model != null)
+        //{
+        modalService.Show("deleteModal");
+        //}
+    }
+
+    public async Task ConfirmDelete()
+    {
+        if (deletingModel != null)
+        {
+            modalService.Hide("deleteModal");
+            await contactsService.Delete(deletingModel.Id);
+            contacts.Remove(deletingModel);
+            NotifierService.Info("Contact deleted");
+        }
+    }
+
+    public void Add()
+    {
+        addModel = new ContactModel();
+        modalService.Show("addModal");
+    }
+
+    public async Task ConfirmAdd()
+    {
+        if (string.IsNullOrWhiteSpace(addModel.City)
+            || string.IsNullOrWhiteSpace(addModel.Name)
+            || string.IsNullOrWhiteSpace(addModel.PhoneNumber))
+        {
+            NotifierService.Warning("All inputs are required.");
+            return;
+        }
+
+        addModel.Id = Guid.NewGuid();
+        await contactsService.Save(addModel);
+        contacts.Add(addModel);
+        addModel = new ContactModel();
+        modalService.Hide("addModal");
     }
 
     public void Edit(ContactModel contact)
     {
+        NotifierService.Log("in Edit");
         editingModel = new ContactModel(contact);
     }
 
@@ -141,7 +247,7 @@ else
         }
         else
         {
-            await service.Save(editingModel);
+            await contactsService.Save(editingModel);
             NotifierService.Info("Changes saved");
             var model = contacts.FirstOrDefault(x => x.Id == editingModel.Id);
             if (model != null)

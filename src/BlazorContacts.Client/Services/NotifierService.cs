@@ -13,5 +13,10 @@ namespace BlazorContacts.Client.Services
         {
             RegisteredFunction.Invoke<object>("BlazorContacts.alert.warning", text);
         }
+
+        public static void Log(string text)
+        {
+            RegisteredFunction.Invoke<object>("BlazorContacts.log", text);
+        }
     }
 }
