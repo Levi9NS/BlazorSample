@@ -21,7 +21,7 @@ namespace BlazorContacts.Client.Services
         public async Task<List<ContactModel>> GetAllAsync()
         {
             string json = await _httpClient.GetStringAsync(ApiPath);
-            return JsonUtil.Deserialize<ContactModel[]>(json).ToList();
+            return Microsoft.JSInterop.Json.Deserialize<ContactModel[]>(json).ToList();
         }
 
         public Task<ContactModel> GetByIdAsync(Guid id) => _httpClient.GetJsonAsync<ContactModel>(ApiPath + id);

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Blazor.Browser.Interop;
+﻿
+using Microsoft.JSInterop;
 
 namespace BlazorContacts.Client.Services
 {
@@ -6,12 +7,12 @@ namespace BlazorContacts.Client.Services
     {
         public void Show(string id)
         {
-            RegisteredFunction.Invoke<object>("BlazorContacts.modal.show", id);
+            JSRuntime.Current.InvokeAsync<object>("BlazorContacts.modal.show", id);
         }
 
         public void Hide(string id)
         {
-            RegisteredFunction.Invoke<object>("BlazorContacts.modal.hide", id);
+            JSRuntime.Current.InvokeAsync<object>("BlazorContacts.modal.hide", id);
         }
     }
 }

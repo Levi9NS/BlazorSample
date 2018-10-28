@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Blazor.Browser.Interop;
+﻿using Microsoft.JSInterop;
 
 namespace BlazorContacts.Client.Services
 {
@@ -6,17 +6,17 @@ namespace BlazorContacts.Client.Services
     {
         public static void Info(string text)
         {
-            RegisteredFunction.Invoke<object>("BlazorContacts.alert.info", text);
+            JSRuntime.Current.InvokeAsync<object>("BlazorContacts.alert.info", text);
         }
 
         public static void Warning(string text)
         {
-            RegisteredFunction.Invoke<object>("BlazorContacts.alert.warning", text);
+            JSRuntime.Current.InvokeAsync<object>("BlazorContacts.alert.warning", text);
         }
 
         public static void Log(string text)
         {
-            RegisteredFunction.Invoke<object>("BlazorContacts.log", text);
+            JSRuntime.Current.InvokeAsync<object>("BlazorContacts.log", text);
         }
     }
 }

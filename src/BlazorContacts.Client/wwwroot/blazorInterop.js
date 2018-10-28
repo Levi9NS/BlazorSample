@@ -1,29 +1,31 @@
-﻿Blazor.registerFunction('BlazorContacts.alert.info', function (text) {
-    toastr.info(text);
-});
+﻿window.BlazorContacts = {};
 
-Blazor.registerFunction('BlazorContacts.alert.warning', function (text) {
-    toastr.warning(text);
-});
+window.BlazorContacts.log = function (obj) {
+    console.log(obj);
+};
 
-Blazor.registerFunction('BlazorContacts.modal.show', function (id) {
+window.BlazorContacts.modal = {};
+window.BlazorContacts.modal.show = function (id) {
     if (id && id.length) {
-        if (id.charAt(0) != "#") {
+        if (id.charAt(0) !== "#") {
             id = "#" + id;
         }
         $(id).modal('show');
     }
-});
-
-Blazor.registerFunction('BlazorContacts.modal.hide', function (id) {
+};
+window.BlazorContacts.modal.hide = function (id) {
     if (id && id.length) {
-        if (id.charAt(0) != "#") {
+        if (id.charAt(0) !== "#") {
             id = "#" + id;
         }
         $(id).modal('hide');
     }
-});
+};
 
-Blazor.registerFunction('BlazorContacts.log', function (text) {
-    console.log(text);
-});
+window.BlazorContacts.alert = {};
+window.BlazorContacts.alert.info = function (text) {
+    toastr.info(text);
+};
+window.BlazorContacts.alert.warning = function (text) {
+    toastr.warning(text);
+};
