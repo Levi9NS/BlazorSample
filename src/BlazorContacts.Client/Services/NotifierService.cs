@@ -13,10 +13,5 @@ namespace BlazorContacts.Client.Services
         {
             JSRuntime.Current.InvokeAsync<object>("BlazorContacts.alert.warning", text);
         }
-
-        public static void Log(string text)
-        {
-            JSRuntime.Current.InvokeAsync<object>("BlazorContacts.log", text);
-        }
     }
 }

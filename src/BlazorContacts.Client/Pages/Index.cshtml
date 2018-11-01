@@ -40,14 +40,7 @@
                     {
                         <tr>
                             <td>
-                                @if (contactModel.IsFavorite)
-                                {
-                                    <span class="oi oi-star active" onclick="@(async () => await ToggleFavorite(contactModel))"></span>
-                                }
-                                else
-                                {
-                                    <span class="oi oi-star active" style="opacity: 0.3" onclick="@(async () => await ToggleFavorite(contactModel))"></span>
-                                }
+                               <FavoriteToggle isFavoriteInitialState="@contactModel.IsFavorite" contactId="@contactModel.Id"></FavoriteToggle>
                             </td>
                             @if (editingModel?.Id == contactModel.Id)
                             {
@@ -104,69 +97,36 @@ else
     </ModalFooter>
 </Modal>
 
-@*<Modal IsOpen="@addModalIsOpen">
-
-</Modal>*@
-
-<div class="modal" id="addModal">
-    <div class="modal-dialog">
-        <div class="modal-content">
-
-            <!-- Modal Header -->
-            <div class="modal-header">
-                <h4 class="modal-title">Add contact</h4>
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
-            </div>
-
-            <!-- Modal body -->
-            <div class="modal-body">
-                <div class="form-group">
-                    <label for="addName">Name</label>
-                    <input type="text" class="form-control" id="addName" bind="@addModel.Name" />
-                </div>
-                <div class="form-group">
-                    <label for="addPhone">Phone number</label>
-                    <input type="text" class="form-control" id="addPhone"  bind="@addModel.PhoneNumber" />
-                </div>
-                <div class="form-group">
-                    <label for="addCity">City</label>
-                    <input type="text" class="form-control" id="addCity"  bind="@addModel.City" />
-                </div>
-            </div>
-
-            <!-- Modal footer -->
-            <div class="modal-footer">
-                <button type="button" class="btn" data-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-danger" onclick=@(async () => await ConfirmAdd())>Add</button>
-            </div>
-
+<Modal IsOpen="@addModalIsOpen">
+    <ModalHeader OnClick="@((e) => { addModalIsOpen = false; StateHasChanged(); })">Add contact</ModalHeader>
+    <ModalBody>
+        <div class="form-group">
+            <label for="addName">Name</label>
+            <input type="text" class="form-control" id="addName" bind="@addModel.Name" />
         </div>
-    </div>
-</div>
-
-
+        <div class="form-group">
+            <label for="addPhone">Phone number</label>
+            <input type="text" class="form-control" id="addPhone" bind="@addModel.PhoneNumber" />
+        </div>
+        <div class="form-group">
+            <label for="addCity">City</label>
+            <input type="text" class="form-control" id="addCity" bind="@addModel.City" />
+        </div>
+    </ModalBody>
+    <ModalFooter>
+        <BlazorButton Color="Color.Primary" OnClick="@(async (e) => await ConfirmAdd())">Add</BlazorButton>
+        <BlazorButton Color="Color.Secondary" OnClick="@((e) => { addModalIsOpen = false; StateHasChanged(); })">Close</BlazorButton>
+    </ModalFooter>
+</Modal>
 
 @functions {
     private List<ContactModel> contacts = new List<ContactModel>();
     private bool loading = true;
 
-    private async Task Refresh()
+    protected override async Task OnInitAsync()
     {
         contacts = await contactsService.GetAllAsync();
         loading = false;
-    }
-
-    protected override async Task OnInitAsync()
-    {
-        await Refresh();
-    }
-
-    public async Task ToggleFavorite(ContactModel contact)
-    {
-        NotifierService.Log("in ToggleFavorite");
-        contact.IsFavorite = !contact.IsFavorite;
-        await contactsService.SetIsFavorite(contact.Id, contact.IsFavorite);
-        NotifierService.Info("Change saved");
     }
 
     #region delete contact
@@ -176,7 +136,6 @@ else
 
     public void DeleteContact(ContactModel model)
     {
-        NotifierService.Log("in DeleteContact");
         deletingModel = model;
         deleteModalIsOpen = true;
     }
@@ -204,7 +163,7 @@ else
     public void Add()
     {
         addModel = new ContactModel();
-        modalService.Show("addModal");
+        addModalIsOpen = true;
     }
 
     public async Task ConfirmAdd()
@@ -233,7 +192,6 @@ else
 
     public void Edit(ContactModel contact)
     {
-        NotifierService.Log("in Edit");
         editingModel = new ContactModel(contact);
     }
 

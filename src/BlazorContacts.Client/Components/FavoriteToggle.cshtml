@@ -1,0 +1,34 @@
+﻿@using BlazorContacts.Client.Services
+@inject ContactsClientService contactsService
+
+@if (isFavorite)
+{
+    <span class="oi oi-star active" onclick="@(async () => await ToggleFavorite())"></span>
+}
+else
+{
+    <span class="oi oi-star active" style="opacity: 0.3" onclick="@(async () => await ToggleFavorite())"></span>
+}
+
+@functions {
+    [Parameter]
+    private bool isFavoriteInitialState { get; set; }
+
+    [Parameter]
+    private Guid contactId { get; set; }
+
+    private bool isFavorite { get; set; }
+
+    protected override void OnInit()
+    {
+        isFavorite = isFavoriteInitialState;
+    }
+
+    private async Task ToggleFavorite()
+    {
+        bool newValue = !isFavorite;
+        await contactsService.SetIsFavorite(contactId, newValue);
+        isFavorite = newValue;
+        NotifierService.Info("Change saved");
+    }
+}
