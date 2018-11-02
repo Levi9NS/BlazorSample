@@ -18,7 +18,7 @@ namespace BlazorContacts.Server
         {
             if (UseServerSide)
             {
-                services.AddSignalR();
+                services.AddServerSideBlazor<Client.Startup>();
             }
 
             services.AddMvc();
